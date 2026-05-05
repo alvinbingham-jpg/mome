@@ -2,28 +2,20 @@
 
 import { QRCodeSVG } from "qrcode.react";
 import { AddressBlock } from "@/components/dashboard/AddressBlock";
+import { ChainLogo, TokenLogo } from "@/components/dashboard/ChainLogo";
 import { formatUSD } from "@/lib/utils";
 import { ShieldIcon } from "@/components/icons/Icons";
+import { ALL_CHAINS, getChain } from "@/lib/logos";
 import type { MomeAppState } from "@/hooks/useMomeApp";
-
-const SUPPORTED_CHAINS = [
-  { name: "Ethereum", color: "#627EEA" },
-  { name: "Base", color: "#0052FF" },
-  { name: "Arbitrum", color: "#28A0F0" },
-  { name: "Optimism", color: "#FF0420" },
-  { name: "Polygon", color: "#8247E5" },
-  { name: "Solana", color: "#14F195" },
-  { name: "BNB Chain", color: "#F0B90B" },
-];
 
 export function DepositTab({ state }: { state: MomeAppState }) {
   const evmAddr = state.evmUaAddress ?? state.ownerAddress ?? "";
   const solAddr = state.solanaUaAddress ?? "";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pt-2">
       <header className="space-y-1">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-mome-forest">
+        <h1 className="large-title">
           {state.quiet ? "Add money" : "Deposit"}
         </h1>
         <p className="text-[13px] text-mome-forest/65">
@@ -78,19 +70,18 @@ export function DepositTab({ state }: { state: MomeAppState }) {
           </div>
         </div>
         <ul className="mt-3 flex flex-wrap gap-1.5">
-          {SUPPORTED_CHAINS.map((c) => (
-            <li
-              key={c.name}
-              className="inline-flex items-center gap-1.5 rounded-pill bg-mome-white border border-mome-forest/10 px-2.5 py-1 text-[11px] text-mome-forest font-medium"
-            >
-              <span
-                className="size-2 rounded-full"
-                style={{ background: c.color }}
-                aria-hidden
-              />
-              {c.name}
-            </li>
-          ))}
+          {ALL_CHAINS.map((slug) => {
+            const c = getChain(slug)!;
+            return (
+              <li
+                key={slug}
+                className="inline-flex items-center gap-1.5 rounded-pill bg-mome-white border border-mome-forest/10 pl-1 pr-2.5 py-1 text-[11px] text-mome-forest font-medium"
+              >
+                <ChainLogo name={slug} size={16} />
+                {c.label}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -107,13 +98,21 @@ export function DepositTab({ state }: { state: MomeAppState }) {
           {state.assets.map((a) => (
             <div
               key={`${a.chainId}-${a.symbol}-${a.tokenAddress}`}
-              className="px-4 py-3 flex items-center justify-between gap-3"
+              className="px-4 py-3 flex items-center gap-3"
             >
-              <div className="min-w-0">
+              <div className="relative shrink-0">
+                <TokenLogo symbol={a.symbol} size={32} />
+                <span className="absolute -bottom-0.5 -right-0.5 ring-2 ring-mome-white rounded-full">
+                  <ChainLogo name={a.chainName} size={14} />
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold text-mome-forest tracking-tight">
-                  {state.quiet ? "USD-pegged" : `${a.amount.toLocaleString(undefined, {
-                    maximumFractionDigits: 4,
-                  })} ${a.symbol}`}
+                  {state.quiet
+                    ? "USD-pegged"
+                    : `${a.amount.toLocaleString(undefined, {
+                        maximumFractionDigits: 4,
+                      })} ${a.symbol}`}
                 </p>
                 <p className="text-[12px] text-mome-forest/55">
                   {state.quiet ? "Held safely" : `on ${a.chainName}`}

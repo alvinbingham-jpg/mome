@@ -85,8 +85,8 @@ export function QuietModeToggle({
           )}
         />
       </span>
-      <span className="text-sm font-medium text-mome-forest tracking-tight">
-        Quiet Mode {quiet ? "on" : "off"}
+      <span className="text-sm font-medium text-mome-forest tracking-tight whitespace-nowrap">
+        {quiet ? "On" : "Off"}
       </span>
     </button>
   );

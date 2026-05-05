@@ -8,6 +8,7 @@ import {
   GoogleIcon,
   MailIcon,
   ShieldIcon,
+  SparkleIcon,
 } from "@/components/icons/Icons";
 
 const VALUE_PROPS = [
@@ -21,32 +22,43 @@ const VALUE_PROPS = [
     title: "No seed phrase",
     body: "Magic embedded wallet uses biometric or email auth. No words to memorize.",
   },
+  {
+    icon: SparkleIcon,
+    title: "Chains disappear",
+    body: "Send any USD-pegged asset from any chain. Universal Accounts unify it.",
+  },
 ];
 
 /**
  * Pre-auth landing inside the phone frame.
  *
- * Renders when no session is live. The aurora-gradient CTA opens Magic's
- * hosted login UI — the same primitive that handles social, email, and
- * biometric auth.
+ * In live mode each CTA opens Magic's hosted login; in demo mode they all
+ * drop straight into the synthetic dashboard so the magic moment can be
+ * walked end-to-end without credentials.
  */
 export function LoginScreen({
   signingIn,
+  demoMode,
   onSignIn,
-  onContinueDemo,
-  demoOnly,
 }: {
   signingIn: boolean;
+  demoMode: boolean;
   onSignIn: () => void;
-  onContinueDemo?: () => void;
-  demoOnly: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <div className="rounded-[28px] aurora p-[1px] shadow-[0_24px_60px_-12px_rgba(136,227,162,0.4)]">
         <div className="rounded-[27px] bg-mome-cream p-6 grain relative overflow-hidden">
           <div className="absolute -top-12 -right-10 w-40 h-40 rounded-full opacity-30 aurora blur-3xl pointer-events-none" />
-          <Wordmark size="lg" />
+          <div className="flex items-center justify-between gap-2">
+            <Wordmark size="lg" />
+            {demoMode && (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-mome-forest text-mome-mint px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]">
+                <span className="size-1.5 rounded-full bg-mome-mint pulse-dot" />
+                Demo
+              </span>
+            )}
+          </div>
           <h1 className="font-display text-[32px] leading-[1.05] font-semibold tracking-[-0.025em] text-mome-forest mt-4 max-w-[18ch]">
             Chains disappear.{" "}
             <span className="aurora-text">Yield appears.</span>
@@ -63,11 +75,15 @@ export function LoginScreen({
           size="lg"
           fullWidth
           onClick={onSignIn}
-          disabled={signingIn || demoOnly}
+          disabled={signingIn}
           className="!rounded-pill h-14"
         >
           <FingerprintIcon className="w-4 h-4" />
-          {signingIn ? "Opening Magic…" : "Continue with biometrics"}
+          {signingIn
+            ? "Opening Magic…"
+            : demoMode
+            ? "Try the demo"
+            : "Continue with biometrics"}
           <ArrowRightIcon className="w-4 h-4" />
         </Button>
         <div className="grid grid-cols-2 gap-2">
@@ -76,7 +92,7 @@ export function LoginScreen({
             size="md"
             fullWidth
             onClick={onSignIn}
-            disabled={signingIn || demoOnly}
+            disabled={signingIn}
             className="!rounded-pill !bg-mome-cream-warm hover:!bg-mome-whisper text-mome-forest"
           >
             <GoogleIcon /> Google
@@ -86,21 +102,19 @@ export function LoginScreen({
             size="md"
             fullWidth
             onClick={onSignIn}
-            disabled={signingIn || demoOnly}
+            disabled={signingIn}
             className="!rounded-pill !bg-mome-cream-warm hover:!bg-mome-whisper text-mome-forest"
           >
             <MailIcon className="w-4 h-4" /> Email
           </Button>
         </div>
 
-        {demoOnly && onContinueDemo && (
-          <button
-            type="button"
-            onClick={onContinueDemo}
-            className="w-full mt-2 text-[12px] text-mome-forest/65 hover:text-mome-forest settle py-2"
-          >
-            Magic isn&rsquo;t configured · continue in demo mode
-          </button>
+        {demoMode && (
+          <p className="text-center text-[11px] text-mome-forest/55 px-4 pt-1 leading-snug">
+            Magic credentials aren&rsquo;t configured for this build.
+            Every CTA continues into the demo dashboard so the full UX is
+            walkable end-to-end.
+          </p>
         )}
       </div>
 

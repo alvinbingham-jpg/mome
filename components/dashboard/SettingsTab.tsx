@@ -9,18 +9,18 @@ import type { MomeAppState } from "@/hooks/useMomeApp";
 export function SettingsTab({
   state,
   onOpenDetails,
+  onOpenAbout,
   onOpenLogout,
 }: {
   state: MomeAppState;
   onOpenDetails: () => void;
+  onOpenAbout: () => void;
   onOpenLogout: () => void;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pt-2">
       <header className="space-y-1">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-mome-forest">
-          Settings
-        </h1>
+        <h1 className="large-title">Settings</h1>
         <p className="text-[13px] text-mome-forest/65">
           {state.quiet
             ? "Quiet defaults. Everything else hidden until you ask."
@@ -65,17 +65,19 @@ export function SettingsTab({
           </div>
           <ChevronRightIcon className="w-5 h-5 text-mome-forest/40" />
         </button>
-        <a
-          href="https://particle.network"
-          target="_blank"
-          rel="noreferrer"
-          className="block px-4 py-3 settle hover:bg-mome-cream-warm"
+        <button
+          type="button"
+          onClick={onOpenAbout}
+          className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 settle press hover:bg-mome-cream-warm"
         >
-          <p className="text-[14px] font-semibold text-mome-forest">About Mome</p>
-          <p className="text-[12px] text-mome-forest/55">
-            Built on Particle UA + EIP-7702 + Magic
-          </p>
-        </a>
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-mome-forest">About Mome</p>
+            <p className="text-[12px] text-mome-forest/55">
+              Stack, principles, and what makes it click
+            </p>
+          </div>
+          <ChevronRightIcon className="w-5 h-5 text-mome-forest/40" />
+        </button>
       </section>
 
       <section className="rounded-[20px] bg-mome-white border border-mome-forest/8 p-4 space-y-2">

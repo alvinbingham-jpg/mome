@@ -47,3 +47,57 @@ export function relativeTime(iso: string) {
   const mo = Math.floor(day / 30);
   return `${mo}mo ago`;
 }
+
+/**
+ * Monzo-style day bucket label for transaction lists.
+ *
+ * Returns "Today" / "Yesterday" / weekday name (this week) /
+ * absolute date (older). The bucket key (YYYY-MM-DD in local time) is
+ * the input.
+ */
+export function dayBucketLabel(bucketKey: string, now = new Date()) {
+  const [y, m, d] = bucketKey.split("-").map(Number);
+  const target = new Date(y, (m ?? 1) - 1, d ?? 1);
+
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const oneDay = 1000 * 60 * 60 * 24;
+  const diffDays = Math.round((startOfToday.getTime() - target.getTime()) / oneDay);
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays > 1 && diffDays < 7) {
+    return target.toLocaleDateString("en-US", { weekday: "long" });
+  }
+  if (target.getFullYear() === now.getFullYear()) {
+    return target.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+    });
+  }
+  return target.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/**
+ * Group an iterable of items by their local-date bucket. Returns an
+ * ordered array of [bucketKey, items[]] tuples, newest first.
+ */
+export function groupByDay<T>(
+  items: T[],
+  getDate: (t: T) => string
+): Array<{ key: string; items: T[] }> {
+  const map = new Map<string, T[]>();
+  for (const item of items) {
+    const d = new Date(getDate(item));
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const arr = map.get(key);
+    if (arr) arr.push(item);
+    else map.set(key, [item]);
+  }
+  return Array.from(map.entries())
+    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    .map(([key, items]) => ({ key, items }));
+}

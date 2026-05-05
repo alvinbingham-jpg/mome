@@ -4,11 +4,17 @@ import { useEffect } from "react";
 import { CloseIcon } from "@/components/icons/Icons";
 
 /**
- * Bottom sheet primitive.
+ * Native-feel bottom sheet.
  *
- * Slides up from the bottom on mobile and renders as a centered card on
- * desktop. Locks page scroll while open. Click the backdrop or press Escape
- * to dismiss.
+ * Behaviour matches modern iOS sheets:
+ *  - Slides up with a spring-eased curve, not a linear one
+ *  - Sticky drag handle at the top so the gesture affordance is obvious
+ *  - Sticky title bar with a hairline separator that appears on scroll
+ *  - Backdrop blurs the content underneath (rather than greying it out)
+ *  - Safe-area-aware bottom padding so content never sits under the home bar
+ *  - Tap backdrop or press Escape to dismiss
+ *
+ * On wide viewports (md+) it centres as a card so desktop preview is sane.
  */
 export function Sheet({
   open,
@@ -45,31 +51,45 @@ export function Sheet({
         type="button"
         aria-label="Dismiss"
         onClick={dismissible ? onClose : undefined}
-        className="absolute inset-0 bg-mome-ink/40 backdrop-blur-sm fade"
+        className="absolute inset-0 bg-black/35 backdrop-blur-md backdrop-in"
         tabIndex={dismissible ? 0 : -1}
       />
+
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative w-full sm:max-w-md sm:m-6 bg-mome-cream rounded-t-3xl sm:rounded-3xl shadow-2xl sheet-in max-h-[92vh] overflow-y-auto"
+        className="relative w-full sm:max-w-md sm:m-6 bg-mome-cream rounded-t-[28px] sm:rounded-[28px] shadow-[0_-12px_40px_-12px_rgba(14,17,22,0.35)] sheet-up max-h-[92vh] overflow-y-auto"
       >
-        <div className="sticky top-0 z-10 bg-mome-cream px-6 pt-3 pb-2 flex items-center justify-between border-b border-mome-forest/5">
-          <span className="font-display text-base text-mome-forest tracking-tight">
-            {title}
-          </span>
-          {dismissible && (
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-              className="rounded-full p-1.5 hover:bg-mome-forest/5 settle text-mome-forest/70"
-            >
-              <CloseIcon />
-            </button>
+        {/* Drag handle */}
+        <div className="sticky top-0 z-10 bg-mome-cream/95 backdrop-blur-xl">
+          <div className="pt-2 pb-1 grid place-items-center">
+            <span
+              aria-hidden
+              className="block w-9 h-[5px] rounded-full bg-mome-forest/15"
+            />
+          </div>
+          {(title || dismissible) && (
+            <div className="px-5 pt-1.5 pb-3 flex items-center justify-between">
+              <span className="font-display text-[17px] font-semibold text-mome-forest tracking-tight">
+                {title}
+              </span>
+              {dismissible && (
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={onClose}
+                  className="rounded-full p-1.5 hover:bg-mome-forest/10 settle text-mome-forest/70 press"
+                >
+                  <CloseIcon />
+                </button>
+              )}
+            </div>
           )}
         </div>
-        <div className="px-6 pb-8 pt-4">{children}</div>
+        <div className="px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2">
+          {children}
+        </div>
       </div>
     </div>
   );

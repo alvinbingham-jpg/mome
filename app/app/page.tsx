@@ -10,10 +10,13 @@ import { LoginScreen } from "@/components/dashboard/LoginScreen";
 import { EarnSheet } from "@/components/dashboard/EarnSheet";
 import { Sheet } from "@/components/dashboard/Sheet";
 import { ShowDetailsPanel } from "@/components/dashboard/ShowDetailsPanel";
+import { AboutSheet } from "@/components/dashboard/AboutSheet";
+import { TransactionDetailSheet } from "@/components/dashboard/TransactionDetailSheet";
+import { Toast } from "@/components/ui/Toast";
+import type { DemoTransaction } from "@/lib/demo-data";
 import { Button } from "@/components/ui/Button";
 import type { Tab } from "@/components/dashboard/BottomNav";
 import { useMomeApp } from "@/hooks/useMomeApp";
-import { isMagicConfigured } from "@/lib/ua-config";
 import { MOODS } from "@/lib/moods";
 
 /**
@@ -30,7 +33,10 @@ export default function AppPage() {
   const [tab, setTab] = useState<Tab>("home");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [earnOpen, setEarnOpen] = useState(false);
+  const [activeTx, setActiveTx] = useState<DemoTransaction | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   /**
    * Open the earn sheet whenever the flow leaves idle, and keep it open until
@@ -65,12 +71,12 @@ export default function AppPage() {
         setQuiet={state.setQuiet}
         tab={tab}
         setTab={setTab}
+        hideNav
       >
         <LoginScreen
           signingIn={state.signingIn}
+          demoMode={state.demo}
           onSignIn={() => state.login()}
-          onContinueDemo={state.demo ? undefined : () => state.login()}
-          demoOnly={!isMagicConfigured()}
         />
       </AppShell>
     );
@@ -89,14 +95,21 @@ export default function AppPage() {
             state={state}
             onSeeAllActivity={() => setTab("activity")}
             onOpenDetails={() => setDetailsOpen(true)}
+            onTxClick={setActiveTx}
+            onAddMoney={() => setTab("deposit")}
+            onSend={() => setToast("Send to a friend — coming soon ✦")}
+            onScan={() => setToast("Scan to pay — coming soon ✦")}
           />
         )}
         {tab === "deposit" && <DepositTab state={state} />}
-        {tab === "activity" && <ActivityTab state={state} />}
+        {tab === "activity" && (
+          <ActivityTab state={state} onTxClick={setActiveTx} />
+        )}
         {tab === "settings" && (
           <SettingsTab
             state={state}
             onOpenDetails={() => setDetailsOpen(true)}
+            onOpenAbout={() => setAboutOpen(true)}
             onOpenLogout={() => setLogoutOpen(true)}
           />
         )}
@@ -123,6 +136,24 @@ export default function AppPage() {
       >
         <ShowDetailsPanel state={state} />
       </Sheet>
+
+      <Sheet
+        open={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+        title="About Mome"
+      >
+        <AboutSheet />
+      </Sheet>
+
+      <TransactionDetailSheet
+        tx={activeTx}
+        open={activeTx !== null}
+        quiet={state.quiet}
+        demo={state.demo}
+        onClose={() => setActiveTx(null)}
+      />
+
+      <Toast message={toast} onDismiss={() => setToast(null)} />
 
       <Sheet
         open={logoutOpen}

@@ -2,20 +2,30 @@
 
 import { BalanceHero } from "@/components/dashboard/BalanceHero";
 import { MoodSelector } from "@/components/dashboard/MoodSelector";
+import { QuickActions } from "@/components/dashboard/QuickActions";
 import { StartEarningButton } from "@/components/dashboard/StartEarningButton";
 import { TransactionRow } from "@/components/dashboard/TransactionRow";
 import { ChevronRightIcon } from "@/components/icons/Icons";
 import { MOODS } from "@/lib/moods";
 import type { MomeAppState } from "@/hooks/useMomeApp";
+import type { DemoTransaction } from "@/lib/demo-data";
 
 export function HomeTab({
   state,
   onSeeAllActivity,
   onOpenDetails,
+  onTxClick,
+  onAddMoney,
+  onSend,
+  onScan,
 }: {
   state: MomeAppState;
   onSeeAllActivity: () => void;
   onOpenDetails: () => void;
+  onTxClick: (tx: DemoTransaction) => void;
+  onAddMoney: () => void;
+  onSend: () => void;
+  onScan: () => void;
 }) {
   const earning = state.earn.kind === "earning";
   const busy =
@@ -29,13 +39,21 @@ export function HomeTab({
   const mood = MOODS[state.mood];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pt-1">
       <BalanceHero
         baseUSD={state.totalUSD}
         mood={state.mood}
         earning={earning}
         quiet={state.quiet}
         chainCount={chainCount}
+      />
+
+      <QuickActions
+        onAddMoney={onAddMoney}
+        onSend={onSend}
+        onEarn={() => (earning ? state.stopEarning() : state.startEarning())}
+        onScan={onScan}
+        earning={earning}
       />
 
       <section className="space-y-2">
@@ -108,7 +126,12 @@ export function HomeTab({
             </div>
           )}
           {recent.map((tx) => (
-            <TransactionRow key={tx.id} tx={tx} quiet={state.quiet} />
+            <TransactionRow
+              key={tx.id}
+              tx={tx}
+              quiet={state.quiet}
+              onClick={onTxClick}
+            />
           ))}
         </div>
       </section>

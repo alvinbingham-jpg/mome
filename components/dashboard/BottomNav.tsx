@@ -9,13 +9,29 @@ import {
 
 export type Tab = "home" | "deposit" | "activity" | "settings";
 
-const TABS: { id: Tab; label: string; quietLabel: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+const TABS: {
+  id: Tab;
+  label: string;
+  quietLabel: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { id: "home", label: "Home", quietLabel: "Home", Icon: HomeIcon },
   { id: "deposit", label: "Deposit", quietLabel: "Add money", Icon: DepositIcon },
   { id: "activity", label: "Activity", quietLabel: "Activity", Icon: ActivityIcon },
   { id: "settings", label: "Settings", quietLabel: "Settings", Icon: SettingsIcon },
 ];
 
+/**
+ * Compact dark pill nav.
+ *
+ * Inspired by modern banking apps: a small forest-green pill sits centered
+ * above the bottom edge. Inactive tabs are just monochrome icons. The
+ * active tab is a lifted cream pill containing the icon + label, so it
+ * reads like "you are here" without dominating the screen.
+ *
+ * The pill auto-sizes to its content (active tab + 3 icons), so swapping
+ * tabs feels like the cream pill slides between them.
+ */
 export function BottomNav({
   active,
   onChange,
@@ -28,35 +44,36 @@ export function BottomNav({
   return (
     <nav
       aria-label="Main navigation"
-      className="bg-mome-cream/85 backdrop-blur-xl border-t border-mome-forest/10 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      className="flex justify-center px-3 pb-[max(1rem,env(safe-area-inset-bottom))]"
     >
-      <ul className="flex items-stretch justify-around gap-1">
+      <ul
+        role="tablist"
+        className="inline-flex items-center gap-0.5 rounded-pill bg-mome-forest text-mome-cream/85 shadow-[0_18px_48px_-12px_rgba(22,67,61,0.45)] p-1"
+      >
         {TABS.map(({ id, label, quietLabel, Icon }) => {
           const isActive = active === id;
+          const labelText = quiet ? quietLabel : label;
           return (
-            <li key={id} className="flex-1">
+            <li key={id}>
               <button
                 type="button"
-                onClick={() => onChange(id)}
+                role="tab"
+                aria-selected={isActive}
                 aria-current={isActive ? "page" : undefined}
-                className={`group w-full flex flex-col items-center gap-0.5 py-1.5 rounded-2xl settle press ${
+                onClick={() => onChange(id)}
+                className={`relative inline-flex items-center justify-center gap-1.5 rounded-pill h-10 settle press ${
                   isActive
-                    ? "text-mome-forest"
-                    : "text-mome-forest/55 hover:text-mome-forest/80"
+                    ? "bg-mome-cream text-mome-forest px-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.25)]"
+                    : "w-10 text-mome-cream/65 hover:text-mome-cream hover:bg-white/5"
                 }`}
               >
-                <span
-                  className={`grid place-items-center w-10 h-10 rounded-2xl settle ${
-                    isActive
-                      ? "bg-mome-forest text-mome-mint"
-                      : "bg-transparent"
-                  }`}
-                >
-                  <Icon className="w-[22px] h-[22px]" />
-                </span>
-                <span className="text-[10.5px] font-medium tracking-tight">
-                  {quiet ? quietLabel : label}
-                </span>
+                <Icon className="w-[18px] h-[18px] shrink-0" />
+                {isActive && (
+                  <span className="text-[12.5px] font-semibold tracking-tight whitespace-nowrap fade">
+                    {labelText}
+                  </span>
+                )}
+                {!isActive && <span className="sr-only">{labelText}</span>}
               </button>
             </li>
           );

@@ -1,6 +1,7 @@
 "use client";
 
 import { AddressBlock } from "@/components/dashboard/AddressBlock";
+import { ChainLogo, TokenLogo } from "@/components/dashboard/ChainLogo";
 import { MOODS } from "@/lib/moods";
 import { formatUSD } from "@/lib/utils";
 import type { MomeAppState } from "@/hooks/useMomeApp";
@@ -55,15 +56,21 @@ export function ShowDetailsPanel({ state }: { state: MomeAppState }) {
             state.assets.map((a, i) => (
               <div
                 key={`${a.chainId}-${a.symbol}-${i}`}
-                className="px-4 py-2.5 flex items-center justify-between text-[13px]"
+                className="px-4 py-2.5 flex items-center gap-3 text-[13px]"
               >
-                <span className="text-mome-forest/80">
+                <div className="relative shrink-0">
+                  <TokenLogo symbol={a.symbol} size={26} />
+                  <span className="absolute -bottom-0.5 -right-0.5 ring-2 ring-mome-cream-warm rounded-full">
+                    <ChainLogo name={a.chainName} size={12} />
+                  </span>
+                </div>
+                <span className="text-mome-forest/80 flex-1 min-w-0 truncate">
                   <span className="font-semibold text-mome-forest">
                     {a.symbol}
                   </span>{" "}
                   on {a.chainName}
                 </span>
-                <span className="tabular text-mome-forest font-semibold">
+                <span className="tabular text-mome-forest font-semibold shrink-0">
                   {formatUSD(a.amountInUSD)}
                 </span>
               </div>

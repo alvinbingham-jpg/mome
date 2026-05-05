@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { MOODS, type MoodId } from "@/lib/moods";
-import { formatUSD } from "@/lib/utils";
 import { SparkleIcon } from "@/components/icons/Icons";
 
 /**
  * Mobile-first hero balance.
  *
- * Big tabular number on cream, mood pill below, live "compounding" indicator
- * when earning. Per-second drift is purely perceptual — the underlying
- * balance still comes from the UA SDK.
+ * Designed to feel like a real banking-app hero:
+ *  - Forest card with a soft animated aurora glow behind the corner
+ *  - Tabular display number, dollar sign separated from the integer for
+ *    weight balance, last two digits dimmed into the cents (so the eye
+ *    lands on whole dollars first)
+ *  - When earning, the cents tick lights up live, with a pulsing dot
+ *  - Quiet/Detail aware copy in the eyebrow + subtitle
  */
 export function BalanceHero({
   baseUSD,
@@ -41,20 +44,28 @@ export function BalanceHero({
 
   const display = earning ? baseUSD + drift : baseUSD;
 
-  // Show fewer decimals when not earning so the eye lands on the dollar value;
-  // when earning, the cents tick gives the magic.
-  const formatted = earning
-    ? formatUSD(display)
-    : new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(display);
+  // Split into dollars & cents so we can render them at different weights.
+  const wholeStr = Math.floor(display).toLocaleString("en-US");
+  const centsStr = (Math.round((display - Math.floor(display)) * 100) || 0)
+    .toString()
+    .padStart(2, "0");
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] bg-mome-forest text-mome-cream p-6 pb-7 grain">
-      <div className="absolute -top-16 -right-12 w-48 h-48 rounded-full opacity-50 aurora blur-3xl pointer-events-none" />
+    <section className="relative overflow-hidden rounded-[28px] bg-mome-forest text-mome-cream px-6 pt-6 pb-7 grain shadow-[0_20px_50px_-20px_rgba(22,67,61,0.55)]">
+      {/* corner aurora glow */}
+      <div
+        aria-hidden
+        className="absolute -top-20 -right-20 w-56 h-56 rounded-full opacity-50 aurora blur-3xl pointer-events-none"
+      />
+      {/* subtle vertical gradient overlay */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.18) 100%)",
+        }}
+      />
 
       <div className="flex items-center justify-between relative">
         <p className="text-[11px] uppercase tracking-[0.16em] text-mome-mint/90 font-semibold">
@@ -72,11 +83,28 @@ export function BalanceHero({
         )}
       </div>
 
-      <p className="font-display font-semibold tracking-[-0.04em] tabular text-[56px] leading-[1.02] mt-3 break-all">
-        {formatted}
+      <p className="font-display font-semibold tabular mt-3 leading-[0.98]">
+        <span
+          className="text-mome-mint/80 align-top mr-0.5"
+          style={{ fontSize: "26px", lineHeight: "1" }}
+        >
+          $
+        </span>
+        <span
+          className="text-mome-cream tracking-[-0.04em]"
+          style={{ fontSize: "56px" }}
+        >
+          {wholeStr}
+        </span>
+        <span
+          className="text-mome-cream/55 tracking-[-0.04em] ml-0.5"
+          style={{ fontSize: "28px" }}
+        >
+          .{centsStr}
+        </span>
       </p>
 
-      <p className="mt-2 text-mome-cream/70 italic text-sm leading-snug max-w-[28ch]">
+      <p className="mt-2 text-mome-cream/70 italic text-[13.5px] leading-snug max-w-[28ch] relative">
         {!earning
           ? "Your money is ready to wake up."
           : quiet
@@ -85,7 +113,7 @@ export function BalanceHero({
       </p>
 
       {!quiet && (
-        <div className="mt-4 inline-flex items-center gap-2 text-[11px] text-mome-cream/60 fade-in">
+        <div className="mt-4 inline-flex items-center gap-2 text-[11px] text-mome-cream/60 fade-in relative">
           <span>Across {chainCount} chains</span>
           <span aria-hidden>·</span>
           <span>One balance</span>

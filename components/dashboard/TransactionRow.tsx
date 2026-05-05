@@ -4,10 +4,10 @@ import {
   ArrowRightIcon,
   CheckCircleIcon,
   DepositIcon,
-  ExternalIcon,
   SparkleIcon,
 } from "@/components/icons/Icons";
-import { formatUSD, relativeTime, shortAddress } from "@/lib/utils";
+import { ChainLogo } from "@/components/dashboard/ChainLogo";
+import { formatUSD, relativeTime } from "@/lib/utils";
 import { useMounted } from "@/hooks/useMounted";
 import type { DemoTransaction } from "@/lib/demo-data";
 
@@ -16,22 +16,22 @@ const KIND_META: Record<
   { tone: string; iconClass: string; Icon: React.ComponentType<{ className?: string }> }
 > = {
   earn: {
-    tone: "bg-mome-mint/20 text-mome-forest",
+    tone: "bg-mome-mint/20",
     iconClass: "text-mome-mint-deep",
     Icon: SparkleIcon,
   },
   deposit: {
-    tone: "bg-mome-aurora-2/20 text-mome-forest",
+    tone: "bg-mome-aurora-2/20",
     iconClass: "text-mome-forest",
     Icon: DepositIcon,
   },
   withdraw: {
-    tone: "bg-mome-aurora-3/30 text-mome-forest",
+    tone: "bg-mome-aurora-3/30",
     iconClass: "text-mome-forest",
     Icon: ArrowRightIcon,
   },
   rebalance: {
-    tone: "bg-mome-forest/10 text-mome-forest",
+    tone: "bg-mome-forest/10",
     iconClass: "text-mome-forest",
     Icon: ArrowRightIcon,
   },
@@ -44,27 +44,41 @@ const QUIET_TITLES: Record<DemoTransaction["kind"], string> = {
   rebalance: "Moved to a better spot",
 };
 
+/**
+ * Reusable activity row.
+ *
+ * Tap target opens the parent's transaction detail sheet. Renders icon +
+ * title + chain-hop chips + amount. Quiet Mode swaps every chain word for
+ * generic copy, but the chain-logo chips stay (they read as colorful dots,
+ * not as crypto vocabulary).
+ */
 export function TransactionRow({
   tx,
   quiet,
+  onClick,
 }: {
   tx: DemoTransaction;
   quiet: boolean;
+  onClick?: (tx: DemoTransaction) => void;
 }) {
   const mounted = useMounted();
   const meta = KIND_META[tx.kind];
   const title = quiet ? QUIET_TITLES[tx.kind] : tx.title;
-  // Defer the `Date.now()`-based relative time until after mount so SSR and
-  // initial client render produce identical HTML.
   const when = mounted ? relativeTime(tx.whenISO) : "just now";
-  const detail = quiet
-    ? `${tx.chainHops.length === 1 ? "Quietly" : "Across"} ${
-        tx.chainHops.length === 1 ? "" : `${tx.chainHops.length} chains `
-      }· ${when}`
-    : `${tx.detail} · ${tx.chainHops.join(" → ")} · ${when}`;
+  const subtitle = quiet
+    ? `${
+        tx.chainHops.length === 1
+          ? "Quietly"
+          : `Across ${tx.chainHops.length} chains`
+      } · ${when}`
+    : `${tx.detail} · ${when}`;
 
   return (
-    <div className="px-4 py-3 flex items-center gap-3 settle">
+    <button
+      type="button"
+      onClick={() => onClick?.(tx)}
+      className="w-full text-left px-4 py-3 flex items-center gap-3 settle press hover:bg-mome-cream-warm/60 cursor-pointer"
+    >
       <div
         className={`shrink-0 w-10 h-10 rounded-full grid place-items-center ${meta.tone}`}
         aria-hidden
@@ -80,17 +94,18 @@ export function TransactionRow({
             <CheckCircleIcon className="w-3.5 h-3.5 text-mome-mint-deep shrink-0" />
           )}
         </div>
-        <p className="text-[12px] text-mome-forest/60 truncate">{detail}</p>
-        {!quiet && (
-          <a
-            href={`https://basescan.org/tx/${tx.txHash}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] font-mono text-mome-forest/55 hover:text-mome-forest settle mt-0.5"
-          >
-            {shortAddress(tx.txHash, 8, 6)}
-            <ExternalIcon className="w-3 h-3" />
-          </a>
+        <p className="text-[12px] text-mome-forest/60 truncate">{subtitle}</p>
+        {!quiet && tx.chainHops.length > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            {tx.chainHops.map((c, i) => (
+              <span key={`${c}-${i}`} className="flex items-center gap-1">
+                <ChainLogo name={c} size={14} />
+                {i < tx.chainHops.length - 1 && (
+                  <span className="text-mome-forest/30 text-[10px]">→</span>
+                )}
+              </span>
+            ))}
+          </div>
         )}
       </div>
       <div className="text-right shrink-0">
@@ -98,6 +113,6 @@ export function TransactionRow({
           {formatUSD(tx.amountUSD)}
         </p>
       </div>
-    </div>
+    </button>
   );
 }
