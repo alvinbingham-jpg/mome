@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { HomeTab } from "@/components/dashboard/HomeTab";
 import { DepositTab } from "@/components/dashboard/DepositTab";
@@ -30,10 +30,21 @@ export default function AppPage() {
   const [tab, setTab] = useState<Tab>("home");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
-  const earnOpen =
-    state.earn.kind !== "idle" && state.earn.kind !== "earning"
-      ? true
-      : state.earn.kind === "earning";
+  const [earnOpen, setEarnOpen] = useState(false);
+
+  /**
+   * Open the earn sheet whenever the flow leaves idle, and keep it open until
+   * the user dismisses it themselves. Dismissal only closes the sheet — the
+   * underlying earning state keeps running.
+   */
+  const wasIdleRef = useRef(true);
+  useEffect(() => {
+    const isIdle = state.earn.kind === "idle";
+    if (wasIdleRef.current && !isIdle) {
+      setEarnOpen(true);
+    }
+    wasIdleRef.current = isIdle;
+  }, [state.earn.kind]);
 
   const earnAmountUSD = useMemo(
     () => Math.max(0.5, Math.min(state.totalUSD * 0.25, 5)),
@@ -98,7 +109,10 @@ export default function AppPage() {
         quiet={state.quiet}
         amountUSD={earnAmountUSD}
         destinationChain={destinationChain}
-        onClose={state.stopEarning}
+        onClose={() => {
+          setEarnOpen(false);
+          if (state.earn.kind === "error") state.stopEarning();
+        }}
         onRetry={() => state.startEarning()}
       />
 
