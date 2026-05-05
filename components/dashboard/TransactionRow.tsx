@@ -8,6 +8,7 @@ import {
   SparkleIcon,
 } from "@/components/icons/Icons";
 import { formatUSD, relativeTime, shortAddress } from "@/lib/utils";
+import { useMounted } from "@/hooks/useMounted";
 import type { DemoTransaction } from "@/lib/demo-data";
 
 const KIND_META: Record<
@@ -50,13 +51,17 @@ export function TransactionRow({
   tx: DemoTransaction;
   quiet: boolean;
 }) {
+  const mounted = useMounted();
   const meta = KIND_META[tx.kind];
   const title = quiet ? QUIET_TITLES[tx.kind] : tx.title;
+  // Defer the `Date.now()`-based relative time until after mount so SSR and
+  // initial client render produce identical HTML.
+  const when = mounted ? relativeTime(tx.whenISO) : "just now";
   const detail = quiet
     ? `${tx.chainHops.length === 1 ? "Quietly" : "Across"} ${
         tx.chainHops.length === 1 ? "" : `${tx.chainHops.length} chains `
-      }· ${relativeTime(tx.whenISO)}`
-    : `${tx.detail} · ${tx.chainHops.join(" → ")} · ${relativeTime(tx.whenISO)}`;
+      }· ${when}`
+    : `${tx.detail} · ${tx.chainHops.join(" → ")} · ${when}`;
 
   return (
     <div className="px-4 py-3 flex items-center gap-3 settle">
