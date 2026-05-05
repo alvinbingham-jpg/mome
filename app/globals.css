@@ -119,3 +119,100 @@ body {
   opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* Aurora ambient glow used behind the phone frame */
+.aurora-bg {
+  background:
+    radial-gradient(60% 40% at 20% 20%, rgba(136, 227, 162, 0.35) 0%, transparent 70%),
+    radial-gradient(60% 40% at 80% 30%, rgba(184, 166, 242, 0.30) 0%, transparent 70%),
+    radial-gradient(60% 40% at 50% 80%, rgba(255, 184, 166, 0.25) 0%, transparent 70%),
+    var(--color-mome-cream);
+}
+
+/* Soft slow drift on the aurora bg */
+@keyframes mome-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  50% {
+    background-position: 5% -3%, 95% 5%, 55% 95%;
+  }
+}
+
+.aurora-bg-animated {
+  animation: mome-drift 18s ease-in-out infinite;
+}
+
+/* Bottom-sheet slide-up */
+@keyframes mome-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-in {
+  animation: mome-sheet-in 360ms var(--ease-settle) both;
+}
+
+@keyframes mome-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade {
+  animation: mome-fade 240ms ease both;
+}
+
+/* Skeleton shimmer for loading state */
+@keyframes mome-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(22, 67, 61, 0.04) 0%,
+    rgba(22, 67, 61, 0.08) 50%,
+    rgba(22, 67, 61, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: mome-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Earn-stage spinning ring */
+@keyframes mome-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin-ring {
+  animation: mome-spin 0.9s linear infinite;
+}
+
+/* Soft scale on press */
+.press {
+  transition: transform 160ms var(--ease-settle);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Hide scrollbars on horizontal mood scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Phone frame on desktop only */
+@media (min-width: 768px) {
+  .phone-frame {
+    border: 1px solid rgba(22, 67, 61, 0.10);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 30px 60px -20px rgba(22, 67, 61, 0.30),
+      0 8px 24px -8px rgba(22, 67, 61, 0.20);
+    border-radius: 36px;
+    overflow: hidden;
+  }
+}
