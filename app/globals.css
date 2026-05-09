@@ -1,26 +1,265 @@
 @import "tailwindcss";
 
+@theme {
+  /* Mome v9.1 brand tokens */
+  --color-mome-forest: #16433d;
+  --color-mome-forest-soft: #1d5750;
+  --color-mome-mint: #88e3a2;
+  --color-mome-mint-deep: #5fc784;
+  --color-mome-cream: #f6fff8;
+  --color-mome-cream-warm: #f1f7e8;
+  --color-mome-white: #ffffff;
+  --color-mome-ink: #0e1116;
+  --color-mome-whisper: #e7ebef;
+  --color-mome-aurora-1: #88e3a2;
+  --color-mome-aurora-2: #b8a6f2;
+  --color-mome-aurora-3: #ffb8a6;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-mome-cream);
+  --foreground: var(--color-mome-forest);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular nums for all $ figures */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Aurora gradient — used ONLY on hero CTA & magic-moment surfaces */
+.aurora {
+  background: linear-gradient(
+    135deg,
+    var(--color-mome-aurora-1) 0%,
+    var(--color-mome-aurora-2) 50%,
+    var(--color-mome-aurora-3) 100%
+  );
+}
+
+.aurora-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-mome-aurora-1) 0%,
+    var(--color-mome-aurora-2) 50%,
+    var(--color-mome-aurora-3) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.settle {
+  transition-timing-function: var(--ease-settle);
+  transition-duration: 320ms;
+}
+
+/* Quiet Mode reveal animation */
+@keyframes mome-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: mome-fade-in 360ms var(--ease-settle) both;
+}
+
+/* Subtle pulse for the live yield counter */
+@keyframes mome-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.pulse-dot {
+  animation: mome-pulse 2s ease-in-out infinite;
+}
+
+/* Premium grain — barely visible warmth on cream surfaces */
+.grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Aurora ambient glow used behind the phone frame */
+.aurora-bg {
+  background:
+    radial-gradient(60% 40% at 20% 20%, rgba(136, 227, 162, 0.35) 0%, transparent 70%),
+    radial-gradient(60% 40% at 80% 30%, rgba(184, 166, 242, 0.30) 0%, transparent 70%),
+    radial-gradient(60% 40% at 50% 80%, rgba(255, 184, 166, 0.25) 0%, transparent 70%),
+    var(--color-mome-cream);
+}
+
+/* Soft slow drift on the aurora bg */
+@keyframes mome-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  50% {
+    background-position: 5% -3%, 95% 5%, 55% 95%;
+  }
+}
+
+.aurora-bg-animated {
+  animation: mome-drift 18s ease-in-out infinite;
+}
+
+/* Bottom-sheet slide-up */
+@keyframes mome-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-in {
+  animation: mome-sheet-in 360ms var(--ease-settle) both;
+}
+
+@keyframes mome-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade {
+  animation: mome-fade 240ms ease both;
+}
+
+/* Skeleton shimmer for loading state */
+@keyframes mome-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(22, 67, 61, 0.04) 0%,
+    rgba(22, 67, 61, 0.08) 50%,
+    rgba(22, 67, 61, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: mome-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Earn-stage spinning ring */
+@keyframes mome-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin-ring {
+  animation: mome-spin 0.9s linear infinite;
+}
+
+/* Soft scale on press */
+.press {
+  transition: transform 160ms var(--ease-settle);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Onboarding sticker drift — tiny rotational sway around the sticker's
+   own tilt angle. CSS variables --rot and --drift are set inline by the
+   Sticker primitive so each instance keeps its own rotation. */
+@keyframes sticker-drift {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(calc(var(--drift, 6px) * -1)) rotate(calc(var(--rot, 0deg) + 1deg));
+  }
+}
+
+/* iOS-style sheet motion. Spring-like ease, slightly longer duration. */
+@keyframes mome-sheet-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.sheet-up {
+  animation: mome-sheet-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mome-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.backdrop-in {
+  animation: mome-backdrop-in 240ms ease both;
+}
+
+/* Large-title collapse area — used by tabs that want an iOS-style header */
+.large-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-size: 34px;
+  line-height: 1.05;
+  color: var(--color-mome-forest);
+}
+
+/* Hide scrollbars on horizontal mood scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Phone frame on desktop only */
+@media (min-width: 768px) {
+  .phone-frame {
+    border: 1px solid rgba(22, 67, 61, 0.10);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 30px 60px -20px rgba(22, 67, 61, 0.30),
+      0 8px 24px -8px rgba(22, 67, 61, 0.20);
+    border-radius: 36px;
+    overflow: hidden;
+  }
 }

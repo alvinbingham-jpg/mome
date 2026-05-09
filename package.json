@@ -9,9 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@particle-network/universal-account-sdk": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "ethers": "^6.16.0",
+    "lucide-react": "^1.14.0",
+    "magic-sdk": "^33.7.0",
     "next": "16.2.4",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "viem": "^2.48.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
